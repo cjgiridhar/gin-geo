@@ -11,7 +11,7 @@ import (
 )
 
 var (
-	fp = "example/GeoLite2-City.mmdb"
+	fp, err = getDB("db/GeoLite2-City.mmdb")
 )
 
 // Tests the Response structure
@@ -31,6 +31,29 @@ func TestErrorResponse(t *testing.T) {
 	if response == nil {
 		t.Errorf("Response structure failed, got %s, want %s",
 			response.Error.Message, "Error string")
+	}
+}
+
+// Tests the Response structure
+func TestResponseStruct(t *testing.T) {
+	response := Response{
+		IPAddress:     "49.207.200.217",
+		CityName:      "Vijayawada",
+		StateCode:     "Andhra Pradesh",
+		CountryCode:   "IN",
+		ContinentCode: "AS",
+		TimeZone:      "Asia/Kolkata",
+		ZipCode:       "520001",
+		Latitude:      16.5167,
+		Longitude:     80.6167,
+		Language:      "en",
+		Error: Error{
+			Code:    400,
+			Message: "All great",
+		},
+	}
+	if response.CityName != "Vijayawada" {
+		t.Errorf("Struct test failed, got %s, want %s", response.CityName, "Vijayawada")
 	}
 }
 
@@ -89,6 +112,11 @@ func TestLanguage(t *testing.T) {
 	}
 }
 
+// Tests if Middleware works correctly
+func TestMiddleware(t *testing.T) {
+	Middleware("db/GeoLite2-City.mmdb")
+}
+
 // Tests if the invalid Client IP is handled correctly by middlewire
 func TestClientNoIP(t *testing.T) {
 	buf := new(bytes.Buffer)
@@ -101,32 +129,14 @@ func TestClientNoIP(t *testing.T) {
 	}
 }
 
-// Tests if the middleware sets the context
-// func TestMiddleware(t *testing.T) {
-// 	buf := new(bytes.Buffer)
-// 	client := &http.Client{}
-// 	c, _ := gin.CreateTestContext(httptest.NewRecorder())
-// 	c.Request, _ = http.NewRequest("GET", "https://baff60d4.ngrok.io/geo", buf)
-// 	c.Request.Header.Set("X-FORWARDED-FOR", "123.123.123.123")
-// 	resp, err := client.Do(c.Request)
-// 	if err != nil {
-// 		log.Fatal("Errored when sending request to the server")
-// 		return
-// 	}
-// 	defer resp.Body.Close()
-
-// 	if err != nil {
-// 		t.Errorf("Middleware failed, got %d, want %d.", resp.StatusCode, 200)
-// 	}
-// }
-
 // Tests the middleware method, that sets the context, by creating Gin request
 func TestGeo(t *testing.T) {
 	buf := new(bytes.Buffer)
 	c, _ := gin.CreateTestContext(httptest.NewRecorder())
 	c.Request, _ = http.NewRequest("GET", "/geo", buf)
 	c.Request.Header.Set("X-FORWARDED-FOR", "123.123.123.123")
-	setContext(c, "example/GeoLite2-City.mmdb")
+	db, _ := getDB("db/GeoLite2-City.mmdb")
+	setContext(c, db)
 	geoResponse, _ := c.Get("GeoResponse")
 	var r Response
 	js, _ := json.Marshal(geoResponse)
@@ -142,7 +152,8 @@ func TestGeoInvalidIP(t *testing.T) {
 	c, _ := gin.CreateTestContext(httptest.NewRecorder())
 	c.Request, _ = http.NewRequest("GET", "/geo", buf)
 	c.Request.Header.Set("X-FORWARDED-FOR", "")
-	setContext(c, "example/GeoLite2-City.mmdb")
+	db, _ := getDB("db/GeoLite2-City.mmdb")
+	setContext(c, db)
 	geoResponse, _ := c.Get("GeoResponse")
 	var r Response
 	js, _ := json.Marshal(geoResponse)
@@ -158,11 +169,7 @@ func TestInvalidDBPath(t *testing.T) {
 	c, _ := gin.CreateTestContext(httptest.NewRecorder())
 	c.Request, _ = http.NewRequest("GET", "/geo", buf)
 	c.Request.Header.Set("X-FORWARDED-FOR", "123.123.123.123")
-	setContext(c, "example/GeoLite2-City-NO.mmdb")
-	geoResponse, _ := c.Get("GeoResponse")
-	var r Response
-	js, _ := json.Marshal(geoResponse)
-	json.Unmarshal(js, &r)
+	_, r := getDB("db/GeoLite2-City-NO.mmdb")
 	if r.Error.Message != "Maxmind DB not found" {
 		t.Errorf("Middleware worked, got %s, want %s.",
 			r.Error.Message, "Maxmind DB not found")
@@ -176,6 +183,33 @@ func TestTimeZone(t *testing.T) {
 	if mappedResponse.TimeZone != "Pacific/Auckland" {
 		t.Errorf("Country Code is incorrect, got %s, want %s.",
 			mappedResponse.TimeZone, "Pacific/Auckland")
+	}
+}
+
+// Tests if the DB returns error
+func TestInvalidCity(t *testing.T) {
+	clientIP := "121.72.165.234"
+	mappedResponse := getResponse(clientIP, "en", fp)
+	if mappedResponse.Error.Message == "Could not get Geo information" {
+		t.Errorf("DB error check failed")
+	}
+}
+
+// Tests for Invalid IP
+func TestInvalidIP(t *testing.T) {
+	clientIP := "256.255.255.255"
+	mappedResponse := getResponse(clientIP, "en", fp)
+	if mappedResponse.Error.Message == "Invalid IP or Loopback IP address" {
+		t.Errorf("TestInvalidIP error check passed")
+	}
+}
+
+// Tests for Invalid IPv6 address
+func TestInvalidIPv6(t *testing.T) {
+	clientIP := "2001:0db8:85a3:0000:0000:8a2e:0370:733"
+	mappedResponse := getResponse(clientIP, "en", fp)
+	if mappedResponse.Error.Message == "Could not get IPv4 address" {
+		t.Errorf("TestInvalidIP error check passed")
 	}
 }
 

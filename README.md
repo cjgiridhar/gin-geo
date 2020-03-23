@@ -1,5 +1,8 @@
 # gin-geo
-[Gin](https://github.com/gin-gonic/gin) middleware that sets the Geographical information about the user in the Gin context
+
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+
+[Gin](https://github.com/gin-gonic/gin) middleware that sets the geographical information about the user in the Gin context
 
 ## Project Context and Features
 

@@ -11,11 +11,6 @@ import (
 	geoip2 "github.com/oschwald/geoip2-golang"
 )
 
-var (
-	db       *geoip2.Reader
-	filePath string
-)
-
 // Error defines the error in returning Geographical information
 type Error struct {
 	Code    int    `json:"code"`
@@ -38,10 +33,10 @@ type Response struct {
 }
 
 // getErrorResponse returns the error if something goes wrong
-func getErrorResponse(error string) *Response {
+func getErrorResponse(errResponse string) *Response {
 	err := Error{
 		Code:    400,
-		Message: error,
+		Message: errResponse,
 	}
 	return &Response{
 		Error: err,
@@ -49,21 +44,22 @@ func getErrorResponse(error string) *Response {
 }
 
 // getResponse Maps the record from Maxmind in appropriate format
-func getResponse(ipAddress string, language string, filePath string) *Response {
+func getResponse(ipAddress string, language string, db *geoip2.Reader) *Response {
 	ip := net.ParseIP(ipAddress)
-	db, err := geoip2.Open(filePath)
-	if err != nil {
-		return getErrorResponse("Maxmind DB not found")
-	}
-	defer db.Close()
 	record, err := db.City(ip)
 	if err != nil {
-		return getErrorResponse("Could not Geo information")
+		return getErrorResponse("Could not get Geo information")
 	}
+
+	var stateCode string
+	if len(record.Subdivisions) > 0 {
+		stateCode = record.Subdivisions[0].Names[language]
+	}
+
 	return &Response{
 		IPAddress:     ipAddress,
 		CityName:      record.City.Names[language],
-		StateCode:     record.Subdivisions[0].Names[language],
+		StateCode:     stateCode,
 		CountryCode:   record.Country.IsoCode,
 		ContinentCode: record.Continent.Code,
 		TimeZone:      record.Location.TimeZone,
@@ -86,7 +82,7 @@ func getLanguage(c *gin.Context) string {
 	return "en"
 }
 
-// getClient returns the IP Address of the user from the headers
+// getClientIP returns the IP Address of the user from the headers
 func getClientIP(c *gin.Context) (string, error) {
 	xForwardedFor := strings.TrimSpace(c.Request.Header.Get("X-FORWARDED-FOR"))
 	remoteAddr := strings.TrimSpace(c.Request.Header.Get("REMOTE-ADDR"))
@@ -115,12 +111,12 @@ func getClientIP(c *gin.Context) (string, error) {
 }
 
 // setContext sets the geographical information in Gin context
-func setContext(c *gin.Context, filePath string) {
+func setContext(c *gin.Context, db *geoip2.Reader) {
 	start := time.Now()
 	ipAddress, err := getClientIP(c)
 	if err == nil {
 		language := getLanguage(c)
-		response := getResponse(ipAddress, language, filePath)
+		response := getResponse(ipAddress, language, db)
 		c.Set("GeoResponse", response)
 	} else {
 		response := getErrorResponse(err.Error())
@@ -130,18 +126,29 @@ func setContext(c *gin.Context, filePath string) {
 	log.Println("Geo: Middleware duration", duration)
 }
 
+// getDB returns the database handle
+func getDB(dbPath string) (*geoip2.Reader, *Response) {
+	db, err := geoip2.Open(dbPath)
+	if err != nil {
+		return nil, getErrorResponse("Maxmind DB not found")
+	}
+	return db, nil
+}
+
 // Middleware sets the Geographical information
 // about the user in the Gin context
-func Middleware() gin.HandlerFunc {
+func Middleware(dbPath string) gin.HandlerFunc {
+	db, dbErr := getDB(dbPath)
 	return func(c *gin.Context) {
-		filePath := "GeoLite2-City.mmdb"
-		setContext(c, filePath)
+		if dbErr == nil {
+			setContext(c, db)
+		}
 		c.Next()
 	}
 }
 
 // Default returns the handler that sets the
 // geographical information about the user
-func Default() gin.HandlerFunc {
-	return Middleware()
+func Default(dbPath string) gin.HandlerFunc {
+	return Middleware(dbPath)
 }
