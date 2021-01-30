@@ -28,7 +28,7 @@ Step 1: Assuming you've installed Go and Gin, run this command to get the middle
 $ go get github.com/cjgiridhar/gin-geo
 ```
 
-Step 2: Download latest GeoLite2 City Database from Maxmind.
+[OPTIONAL] Step 2: Download latest GeoLite2 City Database from Maxmind.
 ```
 $ wget http://geolite.maxmind.com/download/geoip/database/GeoLite2-City.mmdb.gz
 $ gunzip GeoLite2-City.mmdb.gz  
@@ -39,11 +39,12 @@ Copy it from the gin-geo repository
 cp github.com/cjgiridhar/gin-geo/example/GeoLite2-City.mmdb .
 ```
 
-Step 3: Make sure file path for mmdb file is at correct location.
+[OPTIONAL] Step 3: Make sure file path for mmdb file is at correct location.
 Please place the file from where your program runs.
 
 If you look at the [gin-geo](https://github.com/cjgiridhar/gin-geo/tree/master/example) sample code, 
-as ```example.go``` runs from ```example``` folder, we have placed the database at that location.
+```example.go``` is pointing to the database location from the package. Hence Step 2 and Step 3 are optional.
+If you need to use the latest database, please follow Step 2 and point the database path correctly. 
 
 ## Usage
 
@@ -52,7 +53,6 @@ main.go
 package main
 
 import (
-	"fmt"
 	"net/http"
 
 	geo "github.com/cjgiridhar/gin-geo"
@@ -60,13 +60,12 @@ import (
 )
 
 func main() {
-
+	gin.SetMode(gin.ReleaseMode)
 	r := gin.Default()
-	r.Use(geo.Default())
+	r.Use(geo.Default("github.com/cjgiridhar/gin-geo/db/GeoLite2-City.mmdb"))
 	r.GET("/geo", func(c *gin.Context) {
 		geoResponse, ok := c.Get("GeoResponse")
 		if ok {
-			fmt.Println(geoResponse)
 			c.JSON(http.StatusOK, gin.H{
 				"geo": geoResponse,
 			})
@@ -87,7 +86,7 @@ For this you will need a public URL for exposing your local web server.
 
 Follow the steps:
 - Create a ```main.go``` file and copy the contents as given in the Usage section.
-- Make sure GeoLite2-City.mmdb is placed in the same path as main.go.
+- Make sure GeoLite2-City.mmdb is placed in the same path as main.go. [OPTIONAL]
 - Run the demo as: ```go run main.go``` (This will run a local web server on port 8080).
 - Download ngrok and run ```./ngrok http 8080``` (This will generate public URL and expose local web server to the internet).
 - Browse the public URL obtained from step 2, say https://public.ngrok.io/geo, from your browser.
@@ -116,7 +115,7 @@ Follow the steps:
 ```
 2020/03/18 09:54:36 Geo: Middleware duration 391.525µs
 &{151.236.26.140 Zurich Zurich CH EU Europe/Zurich 8048 47.3667 8.55 de {0 }}
-[GIN] 2020/03/18 - 09:54:36 | 200 |     472.715µs |    103.4.18.143 | GET      "/geo"
+[GIN] 2020/03/18 - 09:54:36 | 200 |     472.715µs |    151.236.26.140 | GET      "/geo"
 
 ```
 
