@@ -99,16 +99,16 @@ func TestClientIPHeader(t *testing.T) {
 	}
 }
 
-// Tests if the langauge is correctly detected by middlewire
+// Tests if the language is correctly detected by middlewire
 func TestLanguage(t *testing.T) {
 	buf := new(bytes.Buffer)
 	c, _ := gin.CreateTestContext(httptest.NewRecorder())
 	c.Request, _ = http.NewRequest("GET", "/geo", buf)
 	c.Request.Header.Set("ACCEPT-LANGUAGE", "fr-CH, fr;q=0.9, en;q=0.8, de;q=0.7, *;q=0.5")
-	langauge := getLanguage(c)
-	if langauge != "fr" {
+	language := getLanguage(c)
+	if language != "fr" {
 		t.Errorf("Getting Client IP is incorrect, got %s, want %s.",
-			langauge, "fr")
+			language, "fr")
 	}
 }
 

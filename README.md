@@ -1,8 +1,6 @@
-# gin-geo
+# gin-geo : Geo location middleware for [Gin](https://github.com/gin-gonic/gin)
 
-[Gin](https://github.com/gin-gonic/gin) middleware that sets the geographical information about the user in the Gin context
-
-[![Build][Build-Status-Image]][Build-Status-Url] [![Codecov][codecov-image]][codecov-url][![License][license-image]][license-url]
+[![Build][Build-Status-Image]][Build-Status-Url] [![Codecov][codecov-image]][codecov-url] [![ReportCard][reportcard-image]][reportcard-url] [![GoDoc][godoc-image]][godoc-url] [![License][license-image]][license-url]
 
 ## Project Context and Features
 
@@ -139,5 +137,9 @@ Chetan Giridhar, cjgiridhar@gmail.com
 [Build-Status-Image]: https://travis-ci.com/cjgiridhar/gin-geo.svg?branch=master
 [codecov-url]: https://codecov.io/gh/cjgiridhar/gin-geo
 [codecov-image]: https://codecov.io/gh/cjgiridhar/gin-geo/branch/master/graph/badge.svg
+[reportcard-url]: https://goreportcard.com/report/github.com/cjgiridhar/gin-geo
+[reportcard-image]: https://goreportcard.com/badge/github.com/cjgiridhar/gin-geo
+[godoc-url]: https://godoc.org/github.com/cjgiridhar/gin-geo
+[godoc-image]: https://godoc.org/github.com/cjgiridhar/gin-geo?status.svg
 [license-url]: http://opensource.org/licenses/MIT
 [license-image]: https://img.shields.io/npm/l/express.svg
