@@ -1,8 +1,8 @@
 # gin-geo
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-
 [Gin](https://github.com/gin-gonic/gin) middleware that sets the geographical information about the user in the Gin context
+
+[![Build][Build-Status-Image]][Build-Status-Url] [![Codecov][codecov-image]][codecov-url][![License][license-image]][license-url]
 
 ## Project Context and Features
 
@@ -134,3 +134,10 @@ and used HTTP headers to get the IP Address and Language for the user.
 ## Contact
 
 Chetan Giridhar, cjgiridhar@gmail.com
+
+[Build-Status-Url]: https://travis-ci.com/cjgiridhar/gin-geo
+[Build-Status-Image]: https://travis-ci.com/cjgiridhar/gin-geo.svg?branch=master
+[codecov-url]: https://codecov.io/gh/cjgiridhar/gin-geo
+[codecov-image]: https://codecov.io/gh/cjgiridhar/gin-geo/branch/master/graph/badge.svg
+[license-url]: http://opensource.org/licenses/MIT
+[license-image]: https://img.shields.io/npm/l/express.svg
