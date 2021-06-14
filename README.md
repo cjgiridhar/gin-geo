@@ -131,7 +131,7 @@ and used HTTP headers to get the IP Address and Language for the user.
 
 ## Contact
 
-Chetan Giridhar, cjgiridhar@gmail.com
+Technobeans, https://technobeans.com
 
 [Build-Status-Url]: https://travis-ci.com/cjgiridhar/gin-geo
 [Build-Status-Image]: https://travis-ci.com/cjgiridhar/gin-geo.svg?branch=master
