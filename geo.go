@@ -111,7 +111,6 @@ func getClientIP(c *gin.Context) (string, error) {
 
 // setContext sets the geographical information in Gin context
 func setContext(c *gin.Context, db *geoip2.Reader) {
-	start := time.Now()
 	ipAddress, err := getClientIP(c)
 	if err == nil {
 		language := getLanguage(c)
