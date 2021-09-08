@@ -4,7 +4,6 @@ import (
 	"errors"
 	"net"
 	"strings"
-	"time"
 
 	"github.com/gin-gonic/gin"
 	geoip2 "github.com/oschwald/geoip2-golang"
