@@ -2,7 +2,6 @@ package geo
 
 import (
 	"errors"
-	"log"
 	"net"
 	"strings"
 	"time"
@@ -122,7 +121,6 @@ func setContext(c *gin.Context, db *geoip2.Reader) {
 		response := getErrorResponse(err.Error())
 		c.Set("GeoResponse", response)
 	}
-	duration := time.Now().Sub(start)
 }
 
 // getDB returns the database handle
