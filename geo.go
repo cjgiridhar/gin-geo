@@ -2,10 +2,8 @@ package geo
 
 import (
 	"errors"
-	"log"
 	"net"
 	"strings"
-	"time"
 
 	"github.com/gin-gonic/gin"
 	geoip2 "github.com/oschwald/geoip2-golang"
@@ -112,7 +110,6 @@ func getClientIP(c *gin.Context) (string, error) {
 
 // setContext sets the geographical information in Gin context
 func setContext(c *gin.Context, db *geoip2.Reader) {
-	start := time.Now()
 	ipAddress, err := getClientIP(c)
 	if err == nil {
 		language := getLanguage(c)
@@ -122,8 +119,6 @@ func setContext(c *gin.Context, db *geoip2.Reader) {
 		response := getErrorResponse(err.Error())
 		c.Set("GeoResponse", response)
 	}
-	duration := time.Now().Sub(start)
-	log.Println("Geo: Middleware duration", duration)
 }
 
 // getDB returns the database handle
