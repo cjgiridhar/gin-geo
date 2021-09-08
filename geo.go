@@ -123,7 +123,6 @@ func setContext(c *gin.Context, db *geoip2.Reader) {
 		c.Set("GeoResponse", response)
 	}
 	duration := time.Now().Sub(start)
-	log.Println("Geo: Middleware duration", duration)
 }
 
 // getDB returns the database handle
